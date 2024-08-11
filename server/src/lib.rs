@@ -32,15 +32,11 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .setup(|app| {
             // 获取应用程序的窗口句柄
-            // let handle = app.handle().clone();
-            // 在启动时模拟游戏启动状态
-            // tauri::async_runtime::spawn(async move {
-            //     // 模拟3秒的加载时间
-            //     sleep(Duration::from_secs(3));
-            //     // 发送连接中的状态
-            //     // sleep(Duration::from_secs(1)).await;
-            //     handle.emit("game-status-change", "Connected").unwrap();
-            // });
+            let handle = app.handle().clone();
+            // 在启动时初始化游戏客户端监视器
+            tauri::async_runtime::spawn(async move {
+                // let mut client = handler::::new().await;
+            });
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![mock_connected])

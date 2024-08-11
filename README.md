@@ -1,4 +1,4 @@
-# wargod
+# WARGOD
 
 The God of War in ***League of Legends*** games, It's legitimate game assistant.
 
@@ -11,7 +11,6 @@ The God of War in ***League of Legends*** games, It's legitimate game assistant.
 5. 自动接受对局
 6. 选择英雄事件 -> opgg -> 符文导入 -> 出装、技能
 
-
 ### 技术开发项
 
 1. 游戏进程发现，后台提权
@@ -22,7 +21,6 @@ The God of War in ***League of Legends*** games, It's legitimate game assistant.
 6. 处理游戏事件
 7. 三方数据采集
 
-
 ### 备注：
 
 项目处于初始阶段，感兴趣的可以一起参与
@@ -32,7 +30,7 @@ The God of War in ***League of Legends*** games, It's legitimate game assistant.
 
 ### 参考：
 
-1. LCU-api文档: [lcu-schemae](https://www.mingweisamuel.com/lcu-schema/tool/#/Plugin%20lol-chat/PutLolChatV1Me)
+1. lcu-api文档: [lcu-schema](https://www.mingweisamuel.com/lcu-schema/tool/#/Plugin%20lol-chat/PutLolChatV1Me)
 2. 不错的项目, 可以作为目标: [Seraphine](https://github.com/Zzaphkiel/Seraphine)
 
 ### 目标:

@@ -4,4 +4,9 @@
 pub mod error;
 pub mod process;
 
-fn main() { wargod_lib::run() }
+fn init_logging() { env_logger::Builder::from_default_env().filter_level(log::LevelFilter::Info).init(); }
+
+fn main() {
+    init_logging();
+    wargod_lib::run()
+}

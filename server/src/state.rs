@@ -88,17 +88,17 @@ impl GameStateMachine {
 }
 
 // GAME_STATE_MACHINE 定义全局状态机
-static GAME_STATE_MACHINE: Lazy<Arc<RwLock<GameStateMachine>>> =
+pub static GAME_STATE_MACHINE: Lazy<Arc<RwLock<GameStateMachine>>> =
     Lazy::new(|| Arc::new(RwLock::new(GameStateMachine::new())));
 
 #[tokio::test]
 async fn test_game_state_machine() {
     {
-        // 游戏启动成功 -> 大厅
+        // 游戏启动成功 -> 大厅, 注意：使用需要加block，释放写锁
         let mut state_machine = GAME_STATE_MACHINE.write().await;
         state_machine.handle_event(GameEvent::LaunchSuccess);
         assert_eq!(state_machine.get_state(), &GameState::Lobby);
-    } // 写锁在这里释放
+    } // 
 
     {
         // 加入房间 -> 房间

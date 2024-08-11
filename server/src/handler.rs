@@ -1,71 +1,128 @@
+use std::sync::Arc;
 use std::sync::LazyLock;
+use std::sync::RwLock;
 use std::time::Duration;
 
 use base64::engine::general_purpose;
 use base64::Engine;
+use log::info;
+use log::warn;
+use once_cell::sync::Lazy;
 use regex::Regex;
 use reqwest::header::HeaderMap;
 use reqwest::header::HeaderValue;
 use reqwest::Certificate;
+use tokio::io::AsyncWriteExt;
+use tokio::sync::RwLock as AsyncRwLock;
+use tokio::time::interval;
 
-use crate::error;
 use crate::process;
+use crate::state::GameEvent;
+use crate::state::GAME_STATE_MACHINE;
 
-#[derive(Default, Debug, Clone)]
-pub struct LeagueClient {
-    timeout: Option<u64>,
-    pub path: String,
-    pub token: String,
-    pub port: String,
-    pub platform: String,
-    pub client: reqwest::Client,
+pub struct LeagueProcessMonitor {
+    pid: Arc<AsyncRwLock<Option<u32>>>, // 使用 RwLock 来保护可变状态
+    interval_ms: u64,
 }
 
-impl LeagueClient {
-    pub fn refresh(&mut self) -> Result<(), error::ProcessError> {
-        match process::find_process_id_by_name(CLIENT_EXE) {
-            Ok(pid) => match process::get_process_cmdline(pid) {
-                Ok(cmdline) => {
-                    self.reset(cmdline);
-                    Ok(())
+impl LeagueProcessMonitor {
+    pub async fn new(interval_ms: u64) -> Arc<Self> {
+        let monitor = Arc::new(Self { pid: Arc::new(AsyncRwLock::new(None)), interval_ms });
+
+        let monitor_clone = Arc::clone(&monitor);
+        tokio::spawn(async move {
+            monitor_clone.run().await;
+        });
+
+        monitor
+    }
+
+    pub async fn run(self: Arc<Self>) {
+        let mut interval = interval(Duration::from_millis(self.interval_ms));
+
+        loop {
+            interval.tick().await;
+
+            let pid_result = process::find_process_id_by_name(CLIENT_EXE);
+
+            match pid_result {
+                // 读取到游戏进程
+                Ok(new_pid) => {
+                    let mut pid_lock = self.pid.write().await;
+                    match *pid_lock {
+                        // 当PID从无到有时
+                        None => {
+                            *pid_lock = Some(new_pid);
+                            info!("Process found with PID: {}", new_pid);
+                            self.send_event(GameEvent::LaunchSuccess).await;
+                            self.setup_client(new_pid).await;
+                        }
+                        // 当PID有且改变时
+                        Some(current_pid) if current_pid != new_pid => {
+                            *pid_lock = Some(new_pid);
+                            info!("Process PID changed from {} to {}", current_pid, new_pid);
+                            self.send_event(GameEvent::Reconnect).await;
+                            self.setup_client(new_pid).await;
+                        }
+                        // PID未变化，无需处理
+                        _ => {}
+                    }
                 }
-                Err(e) => Err(e),
-            },
-            Err(e) => Err(e),
+
+                // 未读取到游戏进程
+                Err(_) => {
+                    let pid_lock = self.pid.read().await;
+                    if pid_lock.is_some() {
+                        warn!("Process not found. PID {} is no longer active.", pid_lock.unwrap());
+                        self.send_event(GameEvent::Disconnect).await;
+                    } else {
+                        // 当PID无且未获取到时
+                        warn!("Process launch failed, unable to find PID.");
+                        self.send_event(GameEvent::LaunchFailed).await;
+                    }
+                }
+            }
         }
     }
 
-    pub fn new() -> Result<Self, error::ProcessError> {
-        let mut client = Self::default();
-        match client.refresh() {
-            Ok(_) => Ok(client),
-            Err(e) => Err(e),
+    async fn setup_client(&self, pid: u32) {
+        // 假设你从 PID 获取 cmdline 并初始化 reqwest::Client
+        if !process::is_admin() {
+            process::elevated();
         }
-    }
+        let cmdline = process::get_process_cmdline(pid).unwrap();
+        info!("Setting up client with command line: {}", cmdline);
 
-    pub fn reset(&mut self, cmdline: String) {
         let (path, cmdline) = cmdline.split_once(' ').unwrap();
-        self.path = path.to_string();
-        self.port = Regex::new(PORT_RE).unwrap().captures(cmdline).unwrap()[1].to_string();
-        self.token = Regex::new(TOKEN_RE).unwrap().captures(cmdline).unwrap()[1].to_string();
-        self.platform = Regex::new(PLATFORM_RE).unwrap().captures(cmdline).unwrap()[1].to_string();
+        let port = Regex::new(PORT_RE).unwrap().captures(cmdline).unwrap()[1].to_string();
+        let token = Regex::new(TOKEN_RE).unwrap().captures(cmdline).unwrap()[1].to_string();
+        let platform = Regex::new(PLATFORM_RE).unwrap().captures(cmdline).unwrap()[1].to_string();
+
         let mut headers = HeaderMap::new();
-        let token = general_purpose::STANDARD.encode(format!("riot:{}", self.token));
-        let basic = HeaderValue::from_str(format!("Basic {}", token).as_str()).unwrap();
+        let token_encoded = general_purpose::STANDARD.encode(format!("riot:{}", token));
+        let basic = HeaderValue::from_str(format!("Basic {}", token_encoded).as_str()).unwrap();
         headers.insert("Authorization", basic);
-        self.client = reqwest::ClientBuilder::new()
+
+        let client = reqwest::ClientBuilder::new()
             .add_root_certificate(CERT.clone())
             .default_headers(headers)
-            .timeout(Duration::from_millis(self.timeout.unwrap_or(500)))
+            .timeout(Duration::from_millis(500))
             .build()
             .unwrap();
+
+        let mut client_lock = GLOBAL_CLIENT.write().unwrap();
+        *client_lock = Some(client); // 设置全局客户端
     }
 
-    /// 动态监测游戏进程是否存货或发生改变, 当进程死亡或变更PID时通知外部
-    pub async fn keepalive() {
-        // tokio oneshot + timer.tick
+    async fn send_event(&self, event: GameEvent) {
+        let mut state_machine = GAME_STATE_MACHINE.write().await;
+        state_machine.handle_event(event);
     }
 }
+
+// 全局存储 reqwest::Client
+static GLOBAL_CLIENT: Lazy<Arc<RwLock<Option<reqwest::Client>>>> =
+    Lazy::new(|| Arc::new(RwLock::new(None)));
 
 const CLIENT_EXE: &str = "LeagueClientUx.exe";
 
