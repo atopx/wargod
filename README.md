@@ -14,12 +14,13 @@ The God of War in ***League of Legends*** games, It's legitimate game assistant.
 
 ### 技术开发项
 
-1. 状态机定义
-2. 游戏客户端keepalive检测
-3. LCU接口模型定义
-4. websocket监听游戏事件
-5. 处理游戏事件
-6. 三方数据采集
+1. 游戏进程发现，后台提权
+2. 状态机定义
+3. 游戏客户端keepalive检测
+4. LCU接口模型定义
+5. websocket监听游戏事件
+6. 处理游戏事件
+7. 三方数据采集
 
 
 ### 备注：
