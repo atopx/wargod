@@ -85,3 +85,13 @@ main窗口大小: 1134, 826
 1. import { invoke } from '@tauri-apps/api/core';
 2. import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 3. 在收到事件消息中增加日志输出
+
+
+# 常用的功能
+
+1. 修改状态
+2. 修改生涯背景
+3. 修改段位
+4. 战绩查询 / 分析
+5. 自动接受对局
+6. 选择英雄事件 -> opgg -> 符文导入 -> 出装、技能

@@ -1,7 +1,7 @@
 {
   "productName": "wargod",
   "version": "0.0.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "wargod.itmeng.top",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
@@ -22,6 +22,11 @@
     }
   },
   "bundle": {
+    "windows": {
+      "wix": {
+        "language": "zh-CN"
+      }
+    },
     "active": true,
     "targets": "all",
     "icon": [

@@ -4161,6 +4161,7 @@ dependencies = [
  "derive_more",
  "futures-util",
  "native-tls",
+ "once_cell",
  "regex",
  "reqwest",
  "serde",

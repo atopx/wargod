@@ -61,7 +61,7 @@ impl LeagueClient {
             .unwrap();
     }
 
-    /// 动态监测游戏进程是否存货或发生改变
+    /// 动态监测游戏进程是否存货或发生改变, 当进程死亡或变更PID时通知外部
     pub async fn keepalive() {
         // tokio oneshot + timer.tick
     }
