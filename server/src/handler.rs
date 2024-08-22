@@ -12,12 +12,12 @@ use regex::Regex;
 use reqwest::header::HeaderMap;
 use reqwest::header::HeaderValue;
 use reqwest::Certificate;
-use tokio::io::AsyncWriteExt;
 use tokio::sync::RwLock as AsyncRwLock;
 use tokio::time::interval;
 
 use crate::process;
 use crate::state::GameEvent;
+use crate::state::GameState;
 use crate::state::GAME_STATE_MACHINE;
 
 pub struct LeagueProcessMonitor {
@@ -73,8 +73,10 @@ impl LeagueProcessMonitor {
                 Err(_) => {
                     let pid_lock = self.pid.read().await;
                     if pid_lock.is_some() {
+                        if !GAME_STATE_MACHINE.read().await.get_state().eq(&GameState::Disconnected) {
+                            self.send_event(GameEvent::Disconnect).await;
+                        }
                         warn!("Process not found. PID {} is no longer active.", pid_lock.unwrap());
-                        self.send_event(GameEvent::Disconnect).await;
                     } else {
                         // 当PID无且未获取到时
                         warn!("Process launch failed, unable to find PID.");
@@ -86,7 +88,6 @@ impl LeagueProcessMonitor {
     }
 
     async fn setup_client(&self, pid: u32) {
-        // 假设你从 PID 获取 cmdline 并初始化 reqwest::Client
         if !process::is_admin() {
             process::elevated();
         }
@@ -98,8 +99,12 @@ impl LeagueProcessMonitor {
         let token = Regex::new(TOKEN_RE).unwrap().captures(cmdline).unwrap()[1].to_string();
         let platform = Regex::new(PLATFORM_RE).unwrap().captures(cmdline).unwrap()[1].to_string();
 
+        println!("URL: http://127.0.0.1:{}", port);
+        println!("BASIC AUTH: riot / {}", token);
+
         let mut headers = HeaderMap::new();
         let token_encoded = general_purpose::STANDARD.encode(format!("riot:{}", token));
+
         let basic = HeaderValue::from_str(format!("Basic {}", token_encoded).as_str()).unwrap();
         headers.insert("Authorization", basic);
 

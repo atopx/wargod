@@ -1,6 +1,6 @@
-import { listen } from "@tauri-apps/api/event";
-import { invoke } from "@tauri-apps/api/core";
-import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
+import {listen} from "@tauri-apps/api/event";
+import {invoke} from "@tauri-apps/api/core";
+import {WebviewWindow} from "@tauri-apps/api/webviewWindow";
 
 let opggWindow: WebviewWindow | null = null;
 

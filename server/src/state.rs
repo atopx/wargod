@@ -59,7 +59,10 @@ impl GameStateMachine {
 
     pub fn transition_to(&mut self, new_state: GameState) {
         println!("Transitioning from {:?} to {:?}", self.current_state, new_state);
-        self.previous_state = Some(self.current_state.clone()); // 记录上一个状态
+        if self.current_state != GameState::Disconnected {
+            // 记录上一个状态, 如果是掉线(不变)
+            self.previous_state = Some(self.current_state.clone());
+        }
         self.current_state = new_state;
     }
 
@@ -75,9 +78,11 @@ impl GameStateMachine {
             GameEvent::Disconnect => self.transition_to(GameState::Disconnected),
             GameEvent::Reconnect => {
                 if let Some(prev_state) = &self.previous_state {
+                    // 恢复掉线前的状态
                     self.transition_to(prev_state.clone());
                 } else {
-                    println!("No previous state to revert to");
+                    // 默认恢复到大厅状态
+                    self.transition_to(GameState::Lobby);
                 }
             }
         }
@@ -98,7 +103,7 @@ async fn test_game_state_machine() {
         let mut state_machine = GAME_STATE_MACHINE.write().await;
         state_machine.handle_event(GameEvent::LaunchSuccess);
         assert_eq!(state_machine.get_state(), &GameState::Lobby);
-    } // 
+    } //
 
     {
         // 加入房间 -> 房间
