@@ -44,55 +44,44 @@ type Position struct {
 	} `json:"counters,omitempty"`
 }
 
+type ChampionSummaryAverageStats struct {
+	WinRate  float64 `json:"win_rate,omitempty"`
+	PickRate float64 `json:"pick_rate,omitempty"`
+	BanRate  float64 `json:"ban_rate,omitempty"`
+	Kda      float64 `json:"kda,omitempty"`
+	Tier     int     `json:"tier,omitempty"`
+	Rank     int     `json:"rank,omitempty"`
+	TierData struct {
+		Tier          int `json:"tier,omitempty"`
+		Rank          int `json:"rank,omitempty"`
+		RankPrev      int `json:"rank_prev,omitempty"`
+		RankPrevPatch int `json:"rank_prev_patch,omitempty"`
+	} `json:"tier_data,omitempty"`
+}
+
 type ChampionSummary struct {
-	Id           int  `json:"id,omitempty"`
-	IsRotation   bool `json:"is_rotation,omitempty"`
-	IsRip        bool `json:"is_rip,omitempty"`
-	AverageStats struct {
-		WinRate  float64 `json:"win_rate,omitempty"`
-		PickRate float64 `json:"pick_rate,omitempty"`
-		BanRate  float64 `json:"ban_rate,omitempty"`
-		Kda      float64 `json:"kda,omitempty"`
-		Tier     int     `json:"tier,omitempty"`
-		Rank     int     `json:"rank,omitempty"`
-		TierData struct {
-			Tier          int `json:"tier,omitempty"`
-			Rank          int `json:"rank,omitempty"`
-			RankPrev      int `json:"rank_prev,omitempty"`
-			RankPrevPatch int `json:"rank_prev_patch,omitempty"`
-		} `json:"tier_data,omitempty"`
-	} `json:"average_stats,omitempty"`
-	Positions []Position `json:"positions,omitempty"`
-	Roles     []Role     `json:"roles,omitempty"`
+	Id           int                         `json:"id,omitempty"`
+	IsRotation   bool                        `json:"is_rotation,omitempty"`
+	IsRip        bool                        `json:"is_rip,omitempty"`
+	AverageStats ChampionSummaryAverageStats `json:"average_stats,omitempty"`
+	Positions    []Position                  `json:"positions,omitempty"`
+	Roles        []Role                      `json:"roles,omitempty"`
+}
+
+type ChampionItem struct {
+	Stat
+	Ids []int `json:"ids,omitempty"`
 }
 
 type ChampionInfo struct {
 	Summary        ChampionSummary `json:"summary,omitempty"`
-	SummonerSpells []struct {
-		Stat
-		Ids []int `json:"ids,omitempty"`
-	} `json:"summoner_spells,omitempty"`
-	CoreItems []struct {
-		Stat
-		Ids []int `json:"ids,omitempty"`
-	} `json:"core_items,omitempty"`
-	MythicItems []struct {
-		Stat
-		Ids []int `json:"ids,omitempty"`
-	} `json:"mythic_items,omitempty"`
-	Boots []struct {
-		Stat
-		Ids []int `json:"ids,omitempty"`
-	} `json:"boots,omitempty"`
-	StarterItems []struct {
-		Stat
-		Ids []int `json:"ids,omitempty"`
-	} `json:"starter_items,omitempty"`
-	LastItems []struct {
-		Stat
-		Ids []int `json:"ids,omitempty"`
-	} `json:"last_items,omitempty"`
-	RunePages []struct {
+	SummonerSpells []*ChampionItem `json:"summoner_spells,omitempty"`
+	CoreItems      []*ChampionItem `json:"core_items,omitempty"`
+	MythicItems    []*ChampionItem `json:"mythic_items,omitempty"`
+	Boots          []*ChampionItem `json:"boots,omitempty"`
+	StarterItems   []*ChampionItem `json:"starter_items,omitempty"`
+	LastItems      []*ChampionItem `json:"last_items,omitempty"`
+	RunePages      []struct {
 		Stat
 		Id              int `json:"id,omitempty"`
 		PrimaryPageId   int `json:"primary_page_id,omitempty"`
@@ -107,13 +96,10 @@ type ChampionInfo struct {
 			StatModIds       []int `json:"stat_mod_ids,omitempty"`
 		} `json:"builds,omitempty"`
 	} `json:"rune_pages,omitempty"`
-	Runes          []*Rune `json:"runes,omitempty"`
-	SkillMasteries []struct {
-		Stat
-		Builds []Skill `json:"builds,omitempty"`
-	} `json:"skill_masteries,omitempty"`
-	Skills []Skill `json:"skills,omitempty"`
-	Trends struct {
+	Runes          []*Rune       `json:"runes,omitempty"`
+	SkillMasteries []SkillMaster `json:"skill_masteries,omitempty"`
+	Skills         []Skill       `json:"skills,omitempty"`
+	Trends         struct {
 		TotalRank         int `json:"total_rank,omitempty"`
 		TotalPositionRank int `json:"total_position_rank,omitempty"`
 		Win               []struct {
@@ -156,6 +142,12 @@ type GetChampionInfoResponse struct {
 type ListChampionSummaryResponse struct {
 	Data []ChampionSummary `json:"data,omitempty"`
 	Meta Meta              `json:"meta,omitempty"`
+}
+
+type SkillMaster struct {
+	Ids []string `json:"ids"`
+	Stat
+	Builds []Skill `json:"builds,omitempty"`
 }
 
 // Stat 统计字段

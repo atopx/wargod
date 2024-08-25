@@ -2,132 +2,95 @@ package main
 
 import (
 	"context"
+	"embed"
 	"fmt"
-	"github.com/atopx/clever"
-	"github.com/goccy/go-json"
-	"log"
-	"log/slog"
-	"time"
-	"wargod/core"
-	"wargod/model"
+	"github.com/wailsapp/wails/v2"
+	"github.com/wailsapp/wails/v2/pkg/logger"
+	"github.com/wailsapp/wails/v2/pkg/options"
+	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/windows"
+	"wargod/api"
+	"wargod/game"
 )
 
-type EventType string
+//go:embed all:frontend/dist
+var assets embed.FS
 
-var (
-	EventTypeUpdate = "Update"
-	EventTypeCreate = "Create"
-	EventTypeDelete = "Delete"
-)
-
-type EventMessageBlob[T any] struct {
-	EventType string `json:"eventType"`
-	Uri       string `json:"uri"`
-	Data      T      `json:"data"`
+// App struct
+type App struct {
+	ctx context.Context
+	api *api.Api
 }
 
-const (
-	GameFlowUri     = "/lol-gameflow/v1/gameflow-phase"
-	ChampSessionUri = "/lol-champ-select/v1/session"
-
-	defaultSummonerStatus = `{"statusMessage":"Garbage games","lol":{"rankedLeagueQueue":"RANKED_SOLO_5x5","rankedLeagueTier":"CHALLENGER"}}`
-)
-
-var client *core.Client
-
-func GameFlowHandle(data []byte) error {
-	var resp EventMessageBlob[string]
-	if err := json.Unmarshal(data, &resp); err != nil {
-		return fmt.Errorf("parse game flow event failed: %w", err)
-	}
-	switch resp.Data {
-	case "None":
-		slog.Info("大厅无状态")
-	case "Lobby":
-		slog.Info("进入房间")
-	case "Matchmaking":
-		slog.Info("开始匹配")
-	case "ChampSelect":
-		// 获取选择的英雄
-		slog.Info("获取英雄")
-	case "ReadyCheck":
-		slog.Info("匹配成功")
-		if _, err := client.Post("/lol-matchmaking/v1/ready-check/accept", []byte(`{}`)); err != nil {
-			slog.Error(err.Error())
-		}
-	case "GameStart":
-		// 确定英雄, 推荐出装
-		respData, _ := client.Get("/lol-champ-select/v1/current-champion")
-		slog.Info("锁定英雄: " + string(respData))
-	case "InProgress":
-		slog.Info("载入游戏中...")
-
-	case "WaitingForStats":
-		slog.Info("结束, 等待游戏结果判定")
-	case "PreEndOfGame":
-		slog.Info("等待确认后推出游戏")
-	case "EndOfGame":
-		slog.Info("游戏结束")
-		// 异步分析战绩
-	default:
-		slog.Info("忽略状态: {}" + resp.Data)
-	}
-	return nil
+// startup is called when the app starts. The context is saved
+// so we can call the runtime methods
+func (a *App) startup(ctx context.Context) {
+	a.ctx = ctx
+	a.api.Ctx = ctx
+	a.api.Game = game.New(ctx)
+	go func() {
+		a.api.Game.Start()
+	}()
 }
 
-func ChampSelectHandle(data []byte) error {
-	var resp EventMessageBlob[model.ChampSelect]
+func (a *App) domReady(ctx context.Context) {}
 
-	if err := json.Unmarshal(data, &resp); err != nil {
-		return fmt.Errorf("parse champ select event failed: %w", err)
-	}
+func (a *App) beforeClose(ctx context.Context) bool {
+	return false
+}
 
-	if resp.EventType == "Delete" {
-		return nil
-	}
+func (a *App) shutdown(ctx context.Context) {}
 
-	champ := resp.Data.MyTeam[resp.Data.LocalPlayerCellId%5]
-	record := model.ChampMap[champ.ChampionId]
-	opgg := fmt.Sprintf("https://www.op.gg/modes/aram/%s/build", record.Alias)
-	slog.Info("select champ", slog.String("title", record.Title), slog.String("Link", opgg), slog.String("resp.EventType", resp.EventType))
-	// TODO 自动配置符文
-	return nil
+func (a *App) onSecondInstanceLaunch(data options.SecondInstanceData) {}
+
+// Greet returns a greeting for the given name
+func (a *App) Greet(name string) string {
+	return fmt.Sprintf("Hello %s, It's show time!", name)
 }
 
 func main() {
-	p, err := core.NewSearch().WaitForLauncher()
-	if err != nil {
-		log.Fatal(err)
-	}
-	ga, err := core.NewGameAuth(p)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("%+v\n", ga)
-	ctx := context.Background()
-	for {
-		client, err = core.New(ctx, time.Second, ga)
-		if err == nil {
-			break
-		}
-		slog.Info(err.Error())
-		time.Sleep(time.Second)
-	}
+	// Create an instance of the app structure
+	app := &App{api: api.New()}
+	// Create application with options
+	err := wails.Run(&options.App{
+		Title:             "极地战神",
+		Width:             900,
+		Height:            1200,
+		MinWidth:          900,
+		MinHeight:         1200,
+		DisableResize:     true,
+		Fullscreen:        false,
+		Frameless:         false,
+		StartHidden:       false,
+		HideWindowOnClose: false,
+		BackgroundColour:  &options.RGBA{R: 255, G: 255, B: 255, A: 255},
+		AssetServer:       &assetserver.Options{Assets: assets},
+		OnStartup:         app.startup,
+		OnDomReady:        app.domReady,
+		OnBeforeClose:     app.beforeClose,
+		OnShutdown:        app.shutdown,
+		LogLevel:          logger.DEBUG,
+		Menu:              nil,
+		Logger:            nil,
+		WindowStartState:  options.Normal,
+		SingleInstanceLock: &options.SingleInstanceLock{
+			UniqueId:               "wargod-e3984e08-28dc-4e3d-b70a-45e961589cdc",
+			OnSecondInstanceLaunch: app.onSecondInstanceLaunch,
+		},
+		// Windows platform specific options
+		Windows: &windows.Options{
+			WebviewIsTransparent:              true,
+			WindowIsTranslucent:               true,
+			DisableWindowIcon:                 false,
+			DisableFramelessWindowDecorations: false,
+			WebviewUserDataPath:               "./",
+		},
+		Bind: []interface{}{
+			app.api,
+		},
+	})
 
-	if err = client.Subscribe(map[string]func(data []byte) error{
-		GameFlowUri:     GameFlowHandle,
-		ChampSessionUri: ChampSelectHandle,
-	}); err != nil {
-		log.Fatal(err)
-	}
-	// 设置状态
-	_, err = client.Put("/lol-chat/v1/me", clever.Bytes(defaultSummonerStatus))
 	if err != nil {
-		log.Fatal(err)
-	}
-	for {
-		client.Listen()
-		// 如果websocket出问题, 大概率是游戏掉线, 重新监听
-		main()
+		println("Error:", err.Error())
 	}
 }

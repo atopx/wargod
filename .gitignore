@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 Cargo.lock
 tmp/
+build/bin
+frontend/dist
