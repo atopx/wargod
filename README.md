@@ -21,7 +21,7 @@ The God of War in ***League of Legends*** games, It's legitimate game assistant.
 4. LCU接口模型定义
 5. websocket监听游戏事件
 6. 处理游戏事件
-7. 三方数据采集
+7. 三方数据采集(*短期数据缓存*)
 
 ### 备注：
 
