@@ -9,6 +9,11 @@ import (
 
 const BaseUrl = "https://lol-api-champion.op.gg"
 
+var GameModeMap = map[string]string{
+	"ARAM":    "aram",
+	"CLASSIC": "ranked",
+}
+
 // ListChampionSummary 英雄列表
 // @param region: global/kr/jp ...
 // @param mode: aram / ranked / urf ... 【大乱斗 / 排位 / 无线火力】

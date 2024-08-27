@@ -4,13 +4,14 @@ import (
 	"context"
 	"embed"
 	"fmt"
+	"wargod/api"
+	"wargod/game"
+
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/logger"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
-	"wargod/api"
-	"wargod/game"
 )
 
 //go:embed all:frontend/dist
@@ -33,7 +34,9 @@ func (a *App) startup(ctx context.Context) {
 	}()
 }
 
-func (a *App) domReady(ctx context.Context) {}
+func (a *App) domReady(ctx context.Context) {
+
+}
 
 func (a *App) beforeClose(ctx context.Context) bool {
 	return false
@@ -53,37 +56,37 @@ func main() {
 	app := &App{api: api.New()}
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:             "极地战神",
-		Width:             900,
-		Height:            1200,
-		MinWidth:          900,
-		MinHeight:         1200,
+		Title:             "极地战神 - 正在连线游戏",
+		Width:             840,
+		Height:            1024,
+		MinWidth:          840,
+		MinHeight:         1024,
 		DisableResize:     true,
 		Fullscreen:        false,
 		Frameless:         false,
 		StartHidden:       false,
 		HideWindowOnClose: false,
-		BackgroundColour:  &options.RGBA{R: 255, G: 255, B: 255, A: 255},
-		AssetServer:       &assetserver.Options{Assets: assets},
-		OnStartup:         app.startup,
-		OnDomReady:        app.domReady,
-		OnBeforeClose:     app.beforeClose,
-		OnShutdown:        app.shutdown,
-		LogLevel:          logger.DEBUG,
-		Menu:              nil,
-		Logger:            nil,
-		WindowStartState:  options.Normal,
+		//BackgroundColour:  &options.RGBA{R: 255, G: 255, B: 255, A: 255},
+		AssetServer:      &assetserver.Options{Assets: assets},
+		OnStartup:        app.startup,
+		OnDomReady:       app.domReady,
+		OnBeforeClose:    app.beforeClose,
+		OnShutdown:       app.shutdown,
+		LogLevel:         logger.DEBUG,
+		Menu:             nil,
+		Logger:           nil,
+		WindowStartState: options.Normal,
 		SingleInstanceLock: &options.SingleInstanceLock{
 			UniqueId:               "wargod-e3984e08-28dc-4e3d-b70a-45e961589cdc",
 			OnSecondInstanceLaunch: app.onSecondInstanceLaunch,
 		},
 		// Windows platform specific options
 		Windows: &windows.Options{
-			WebviewIsTransparent:              true,
-			WindowIsTranslucent:               true,
-			DisableWindowIcon:                 false,
-			DisableFramelessWindowDecorations: false,
-			WebviewUserDataPath:               "./",
+			//WebviewIsTransparent: true,
+			//WindowIsTranslucent: false,
+			DisableWindowIcon: false,
+			//DisableFramelessWindowDecorations: false,
+			WebviewUserDataPath: "./",
 		},
 		Bind: []interface{}{
 			app.api,

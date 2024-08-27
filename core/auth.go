@@ -5,17 +5,17 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"fmt"
-	"github.com/shirou/gopsutil/v3/process"
-	"os"
 	"strings"
+
+	"github.com/atopx/clever"
+	"github.com/shirou/gopsutil/v3/process"
 )
 
 var tlsConfig *tls.Config
 
 func init() {
 	certPool := x509.NewCertPool()
-	body, _ := os.ReadFile("riotgames.pem")
-	certPool.AppendCertsFromPEM(body)
+	certPool.AppendCertsFromPEM(clever.Bytes(CERT))
 	tlsConfig = &tls.Config{RootCAs: certPool}
 }
 

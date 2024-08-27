@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/gorilla/websocket"
 	"io"
 	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 // Client 是自定义的HTTP客户端结构体
@@ -110,7 +111,7 @@ func (c *Client) Subscribe(events map[string]func(data []byte) error) error {
 	for k, f := range events {
 		handler := newHandler(k, f)
 		c.handles = append(c.handles, handler)
-		slog.Debug("register event", handler.name)
+		slog.Debug("register event", slog.String("handle", handler.name))
 		if err := c.wsClient.WriteMessage(websocket.TextMessage, handler.subscribe); err != nil {
 			return fmt.Errorf("riot listerner subscribe failed: %w", err)
 		}

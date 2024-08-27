@@ -1,23 +1,20 @@
 <template>
-<!--  <n-card title="召唤师技能推荐">-->
-  <n-card>
-    <n-grid x-gap="12" :cols="3">
-      <n-gi v-for="(spell, idx) in spells" :key="idx" class="spell-order-item">
-        <div class="spell-icons">
-          <img :src="`/src/assets/spells/${spell.ids[0]}.png`" alt="spell-left" class="spell-img"/>
-          <img :src="`/src/assets/spells/${spell.ids[1]}.png`" alt="spell-right" class="spell-img"/>
-        </div>
-        <div class="spell-stats">
-          <div class="stat win-rate">胜率 {{ (spell.win / spell.play * 100).toFixed(2) }}%</div>
-          <div class="stat pick_rate">使用率 {{ (spell.pick_rate * 100).toFixed(2) }}%</div>
-        </div>
-      </n-gi>
-    </n-grid>
-  </n-card>
+  <!--  <n-card title="召唤师技能推荐">-->
+  <n-grid x-gap="12" :cols="3">
+    <n-gi v-for="(spell, idx) in spells" :key="idx" class="spell-order-item">
+      <div class="spell-icons">
+        <img :src="`/assets/spells/${spell.ids[0]}.png`" alt="spell-left" class="spell-img"/>
+        <img :src="`/assets/spells/${spell.ids[1]}.png`" alt="spell-right" class="spell-img"/>
+      </div>
+      <div class="spell-stats">
+        <div class="stat win-rate">胜率 {{ (spell.win / spell.play * 100).toFixed(2) }}%</div>
+        <div class="stat pick_rate">使用率 {{ (spell.pick_rate * 100).toFixed(2) }}%</div>
+      </div>
+    </n-gi>
+  </n-grid>
 </template>
 
 <script lang="ts" setup>
-import {NCard} from 'naive-ui';
 import {Item} from "../../types/game";
 
 const props = defineProps<{
@@ -36,7 +33,7 @@ const props = defineProps<{
   display: flex;
   align-items: center;
   margin-left: 32px;
-  margin-right: 32px;
+  margin-right: 10px;
 }
 
 .spell-img {

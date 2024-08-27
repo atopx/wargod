@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"wargod/game"
 )
 
 func main() {
-	lol := game.New()
+	ctx := context.Background()
+	lol := game.New(ctx)
 	lol.Start()
 }

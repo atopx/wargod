@@ -1,8 +1,11 @@
 package opgg
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
+
+	"github.com/atopx/clever"
 )
 
 func TestListChampion(t *testing.T) {
@@ -13,9 +16,7 @@ func TestListChampion(t *testing.T) {
 }
 
 func TestGetChampionInfo(t *testing.T) {
-	result := GetChampionInfo(412, "global", "aram", "none")
-
-	fmt.Printf("大乱斗: %+v\n", *result)
-	result = GetChampionInfo(412, "global", "ranked", "support")
-	fmt.Printf("排位: %+v\n", *result)
+	result := GetChampionInfo(201, "global", "aram", "none")
+	data, _ := json.Marshal(&result)
+	fmt.Println(clever.String(data))
 }

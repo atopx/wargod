@@ -33,6 +33,9 @@ export interface Champion {
     win_rate: number;
     pick_rate: number;
     kda: number;
+    rank: number;
+    tier: number;
+    ban_rate: number;
 }
 
 export interface ChampInfo {

@@ -15,11 +15,14 @@ func (g *Game) gameFlowHandle(data []byte) error {
 	}
 	// 发送状态事件
 	runtime.EventsEmit(g.ctx, "GameState", resp.Data)
-	g.flow = resp.Data
+	runtime.WindowSetTitle(g.ctx, "极地战神 - "+FlowCnMap[resp.Data])
+	g.Flow = resp.Data
 	switch resp.Data {
 	case FlowNone:
 		slog.Info("大厅无状态")
 	case FlowLobby:
+		// 获取游戏模式
+		//g.GetGameMode()
 		slog.Info("进入房间")
 	case FlowMatchmaking:
 		slog.Info("开始匹配")
@@ -37,7 +40,6 @@ func (g *Game) gameFlowHandle(data []byte) error {
 		slog.Info("锁定英雄: " + string(respData))
 	case FlowInProgress:
 		slog.Info("载入游戏中...")
-
 	case FlowWaitingForStats:
 		slog.Info("结束, 等待游戏结果判定")
 	case FlowPreEndOfGame:

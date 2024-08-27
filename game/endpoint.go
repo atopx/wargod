@@ -10,6 +10,7 @@ const (
 	EndpointChatMe                     = "/lol-chat/v1/me"                        // 当前召唤师
 	EndpointPerksCurrentPage           = "/lol-perks/v1/currentpage"
 	EndpointPerksSetPage               = "/lol-perks/v1/pages/%d"
+	EndpointLobby                      = "/lol-lobby/v2/lobby"
 )
 
 var (
@@ -29,3 +30,17 @@ const (
 	FlowEndOfGame       = "EndOfGame"       // 退出游戏
 	Disconnect          = "Disconnect"      // 掉线
 )
+
+var FlowCnMap = map[string]string{
+	FlowNone:            "大厅",
+	FlowLobby:           "组队中",
+	FlowMatchmaking:     "正在匹配",
+	FlowReadyCheck:      "匹配成功",
+	FlowChampSelect:     "英雄选择",
+	FlowGameStart:       "游戏即将开始",
+	FlowInProgress:      "正在载入游戏",
+	FlowWaitingForStats: "等待游戏结果判定",
+	FlowPreEndOfGame:    "游戏结束",
+	FlowEndOfGame:       "游戏结束",
+	Disconnect:          "正在连线游戏",
+}

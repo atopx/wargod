@@ -3,7 +3,12 @@ package api
 import (
 	"context"
 	"fmt"
+	"github.com/atopx/clever"
+	"github.com/goccy/go-json"
 	"log/slog"
+	"os"
+	"os/exec"
+	"path"
 	"wargod/game"
 	"wargod/model"
 	"wargod/opgg"
@@ -16,6 +21,25 @@ type Api struct {
 
 func New() *Api {
 	return &Api{}
+}
+
+func (a *Api) GameLauncher() error {
+	data, err := os.ReadFile(`C:\ProgramData\Riot Games\RiotClientInstalls.json`)
+	if err != nil {
+		return fmt.Errorf("未寻找到游戏安装路径")
+	}
+	result := make(map[string]any)
+	_ = json.Unmarshal(data, &result)
+	clientPath := path.Join(path.Dir(path.Dir(result["rc_default"].(string))), "TCLS", "client.exe")
+	output, err := exec.Command(clientPath).CombinedOutput()
+	if err != nil {
+		return fmt.Errorf(clever.String(output))
+	}
+	return nil
+}
+
+func (a *Api) GetState() string {
+	return a.Game.Flow
 }
 
 func (a *Api) SetRune(champRune opgg.Rune) {

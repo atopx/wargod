@@ -7,21 +7,18 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
     Item: typeof import('./src/components/game/Item.vue')['default']
     Loading: typeof import('./src/components/Loading.vue')['default']
     NButton: typeof import('naive-ui')['NButton']
-    NCard: typeof import('naive-ui')['NCard']
     NDivider: typeof import('naive-ui')['NDivider']
     NFlex: typeof import('naive-ui')['NFlex']
     NGi: typeof import('naive-ui')['NGi']
     NGrid: typeof import('naive-ui')['NGrid']
     NLayout: typeof import('naive-ui')['NLayout']
+    NNotificationProvider: typeof import('naive-ui')['NNotificationProvider']
     NSpace: typeof import('naive-ui')['NSpace']
-    RouterLink: typeof import('vue-router')['RouterLink']
-    RouterView: typeof import('vue-router')['RouterView']
+    NTag: typeof import('naive-ui')['NTag']
     Rune: typeof import('./src/components/game/Rune.vue')['default']
-    Sidebar: typeof import('./src/components/Sidebar.vue')['default']
     Skill: typeof import('./src/components/game/Skill.vue')['default']
     Spell: typeof import('./src/components/game/Spell.vue')['default']
   }

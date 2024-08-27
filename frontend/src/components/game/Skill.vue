@@ -1,33 +1,28 @@
 <template>
-  <n-card>
-
-    <n-flex justify="space-between">
-      <div class="skill-row">
-        <div v-for="(id, index) in skill.ids" :key="index" class="skill-item">
-          <span :class="['keycap', id.toLowerCase()]">{{ id }}</span>
-          <img src="/src/assets/icons/icon-arrow-right.svg" alt="arrow" v-if="index < skill.ids.length - 1"/>
-        </div>
+  <n-flex justify="space-between">
+    <div class="skill-row">
+      <div v-for="(id, index) in skill.ids" :key="index" class="skill-item">
+        <span :class="['keycap', id.toLowerCase()]">{{ id }}</span>
+        <img src="/assets/icons/icon-arrow-right.svg" alt="arrow" v-if="index < skill.ids.length - 1"/>
       </div>
-      <n-space justify="end">
-        <div class="stat win-rate">胜率 {{ (skill.win / skill.play * 100).toFixed(2) }}%</div>
-        <div class="stat pick_rate">使用率 {{ (skill.pick_rate * 100).toFixed(2) }}%</div>
-      </n-space>
-    </n-flex>·
-    <div class="skill-order">
-      <n-grid :x-gap="8" :cols="24">
-        <n-gi v-for="(id, index) in skill.order" :key="index" :class="['keycap', id.toLowerCase()]"
-              style="width: 24px;height: 24px;line-height: 24px">
-          {{ id }}
-        </n-gi>
-
-      </n-grid>
     </div>
-  </n-card>
+    <n-space justify="end">
+      <div class="stat win-rate">胜率 {{ (skill.win / skill.play * 100).toFixed(2) }}%</div>
+      <div class="stat pick_rate">使用率 {{ (skill.pick_rate * 100).toFixed(2) }}%</div>
+    </n-space>
+  </n-flex>
+  <div class="skill-order">
+    <n-grid :x-gap="8" :cols="24">
+      <n-gi v-for="(id, index) in skill.order" :key="index" :class="['keycap', id.toLowerCase()]"
+            style="width: 24px;height: 24px;line-height: 24px">
+        {{ id }}
+      </n-gi>
+    </n-grid>
+  </div>
 
 </template>
 
 <script lang="ts" setup>
-import {NCard} from 'naive-ui';
 import {Skill} from "../../types/game";
 
 const props = defineProps<{
@@ -38,7 +33,7 @@ const props = defineProps<{
 <style scoped>
 
 .skill-order {
-  margin-top: 5px;
+  margin-top: 4px;
   margin-left: 20px;
 }
 

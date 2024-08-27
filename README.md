@@ -2,14 +2,16 @@
 
 The God of War in ***League of Legends*** games, It's legitimate game assistant.
 
+![alt text](docs/image.png)
+
 ### 预期核心功能
 
-1. 修改状态
-2. 修改生涯背景
-3. 修改段位
-4. 战绩查询 / 分析
-5. 自动接受对局
-6. 选择英雄事件 -> opgg -> 符文导入 -> 出装、技能
+- [ ] 修改状态
+- [ ] 修改生涯背景
+- [ ] 修改段位
+- [ ] 战绩查询 / 分析
+- [x] 自动接受对局
+- [x] 选择英雄事件 -> opgg -> 符文导入 -> 出装、技能
 
 ### 技术开发项
 
@@ -25,8 +27,8 @@ The God of War in ***League of Legends*** games, It's legitimate game assistant.
 
 项目处于初始阶段，感兴趣的可以一起参与
 
-- 前端技术栈不限(优先使用原生ts/css/html保证轻量和性能)
-- 后端rust或者有其他编程经验想学习rust的
+- 前端vue3 typescript
+- 后端golang wails
 
 ### 参考：
 
@@ -38,3 +40,4 @@ The God of War in ***League of Legends*** games, It's legitimate game assistant.
 1. 功能完整
 2. 性能，兼顾轻量
 3. 代码可读
+4. 跨平台
