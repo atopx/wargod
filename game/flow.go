@@ -5,6 +5,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"log/slog"
+	"wargod/conf"
 	"wargod/model"
 )
 
@@ -31,12 +32,15 @@ func (g *Game) gameFlowHandle(data []byte) error {
 		slog.Info("获取英雄")
 	case FlowReadyCheck:
 		slog.Info("匹配成功")
-		if _, err := g.Client.Post(EndpointMatchReadyAccept, EmptyJsonBody); err != nil {
-			slog.Error(err.Error())
+		if conf.Entry.AutoAccept {
+			// 如果开启了自动应战
+			if _, _, err := g.Client.Post(EndpointMatchReadyAccept, EmptyJsonBody); err != nil {
+				slog.Error(err.Error())
+			}
 		}
 	case FlowGameStart:
 		// 确定英雄, 推荐出装
-		respData, _ := g.Client.Get(EndpointChampSelectCurrentChampion)
+		respData, _, _ := g.Client.Get(EndpointChampSelectCurrentChampion)
 		slog.Info("锁定英雄: " + string(respData))
 	case FlowInProgress:
 		slog.Info("载入游戏中...")

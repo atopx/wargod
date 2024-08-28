@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"strings"
 	"time"
+	"wargod/conf"
 	"wargod/core"
 	"wargod/model"
 
@@ -84,22 +85,24 @@ func (g *Game) subscribe() error {
 
 func (g *Game) setDefaultStatus() error {
 	// 进入游戏后的一些默认设置, 比如默认设置为最强王者 hahaha
-	v := `{"statusMessage":"Garbage games","lol":{"rankedLeagueQueue":"RANKED_SOLO_5x5","rankedLeagueTier":"CHALLENGER"}}`
-	_, err := g.Client.Put(EndpointChatMe, clever.Bytes(v))
-	g.GetGameMode()
-	data, _ := g.Client.Get(EndpointGameFlowPhase)
+	if conf.Entry.AutoStatus {
+		_, _, err := g.Client.Put(EndpointChatMe, conf.Entry.StatusContent.Data())
+		if err != nil {
+			return err
+		}
+	}
+	data, _, _ := g.Client.Get(EndpointGameFlowPhase)
 	g.Flow = strings.Trim(clever.String(data), `"`)
 	runtime.WindowSetTitle(g.ctx, "极地战神 - "+FlowCnMap[g.Flow])
-	return err
+	return nil
 }
 
 func (g *Game) GetGameMode() {
-	data, err := g.Client.Get(EndpointLobby)
+	data, _, err := g.Client.Get(EndpointLobby)
 	if err != nil {
 		slog.Error("get game lobby error", slog.String("error", err.Error()))
 		return
 	}
-	fmt.Println(clever.String(data))
 	var lobby model.Lobby
 	_ = json.Unmarshal(data, &lobby)
 	g.Mode = lobby.GameConfig.GameMode

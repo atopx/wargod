@@ -5,6 +5,7 @@ import (
 	"embed"
 	"fmt"
 	"wargod/api"
+	"wargod/conf"
 	"wargod/game"
 
 	"github.com/wailsapp/wails/v2"
@@ -52,6 +53,9 @@ func (a *App) Greet(name string) string {
 }
 
 func main() {
+	if err := conf.LoadConfig(); err != nil {
+		panic(err)
+	}
 	// Create an instance of the app structure
 	app := &App{api: api.New()}
 	// Create application with options

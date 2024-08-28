@@ -48,49 +48,45 @@ func New(ctx context.Context, timeout time.Duration, ga *GameAuth) (*Client, err
 }
 
 // Request 创建HTTP请求并设置Basic Auth和默认Header
-func (c *Client) Request(method, endpoint string, body []byte) ([]byte, error) {
+func (c *Client) Request(method, endpoint string, body []byte) ([]byte, int, error) {
 	url := c.baseURL + endpoint
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
 	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
+		return nil, 0, fmt.Errorf("failed to create request: %w", err)
 	}
 	req.Header.Set("Authorization", c.auth)
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("%s request %s failed: %w", method, url, err)
+		return nil, 0, fmt.Errorf("%s request %s failed: %w", method, url, err)
 	}
 	defer func() { _ = resp.Body.Close() }()
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to %s %s read response body: %w", method, url, err)
+		return nil, resp.StatusCode, fmt.Errorf("failed to %s %s read response body: %w", method, url, err)
 	}
-
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("%s request %s failed with status: %d, resp: %s", method, url, resp.StatusCode, data)
-	}
-	return data, nil
+	return data, resp.StatusCode, nil
 }
 
 // Get 发送GET请求
-func (c *Client) Get(endpoint string) ([]byte, error) {
+func (c *Client) Get(endpoint string) ([]byte, int, error) {
 	return c.Request(http.MethodGet, endpoint, nil)
 }
 
 // Post 发送POST请求
-func (c *Client) Post(endpoint string, body []byte) ([]byte, error) {
+func (c *Client) Post(endpoint string, body []byte) ([]byte, int, error) {
 	return c.Request(http.MethodPost, endpoint, body)
 }
 
 // Put 发送PUT请求
-func (c *Client) Put(endpoint string, body []byte) ([]byte, error) {
+func (c *Client) Put(endpoint string, body []byte) ([]byte, int, error) {
 	return c.Request(http.MethodPut, endpoint, body)
 }
 
 // Delete 发送DELETE请求
 func (c *Client) Delete(endpoint string) error {
-	_, err := c.Request(http.MethodDelete, endpoint, nil)
+	_, _, err := c.Request(http.MethodDelete, endpoint, nil)
 	return err
 }
 

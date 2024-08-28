@@ -27,7 +27,7 @@ func (search *Search) Close() {
 const app = "LeagueClientUx.exe"
 
 func (search *Search) WaitForLauncher() (*process.Process, error) {
-	ticker := time.Tick(1 * time.Second)
+	ticker := time.Tick(time.Second)
 	for {
 		select {
 		case <-ticker:
