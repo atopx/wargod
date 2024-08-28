@@ -19,7 +19,7 @@ export function GetState():Promise<string>;
 
 export function GetSummoner(arg1:string):Promise<model.Summoner>;
 
-export function ListGameSummary(arg1:string,arg2:number,arg3:number):Promise<Array<model.GameSummary>>;
+export function ListGameSummary(arg1:string,arg2:number,arg3:number):Promise<model.GameSummary>;
 
 export function SearchSummoner(arg1:string):Promise<model.Summoner>;
 

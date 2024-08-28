@@ -2,14 +2,54 @@ package game
 
 import (
 	"fmt"
+	"github.com/atopx/clever"
 	"github.com/goccy/go-json"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"log/slog"
+	"wargod/conf"
 	"wargod/model"
 	"wargod/opgg"
+	"wargod/types"
 )
 
-// 发送英雄选择事件
+// SwapChampion 发送备战席交换请求
+func (g *Game) SwapChampion(champId int) error {
+	swapResp, code, err := g.Client.Post(fmt.Sprintf("/lol-champ-select/v1/session/bench/swap/%d", champId), nil)
+	if err != nil {
+		return fmt.Errorf("swap champ %d: %w", champId, err)
+	}
+	if code >= 400 {
+		return fmt.Errorf("swap champ %d: %s", champId, clever.String(swapResp))
+	}
+	return nil
+}
+
+// GetSwapChampionId 匹配备战席中最高优先级的英雄
+func (g *Game) GetSwapChampionId(champ model.Team, benchChampions []model.BenchChampion) int {
+	truncation := len(conf.Entry.AramConfig.SwapPriorityChampIds)
+	// 1. 判断当前英雄在优先级队列的位置 currentIdx, 如果不存在取SwapPriorityChampIds长度
+	for i, priority := range conf.Entry.AramConfig.SwapPriorityChampIds {
+		if priority == champ.ChampionId {
+			truncation = i
+			break
+		}
+	}
+	// 2. 如果当前英雄不是最高优先级, 则进行逻辑处理
+	if truncation > 0 {
+		// 3. 获取最高优先级的英雄ID, 如果存在则交换:
+		// - 外层遍历本地优先级队列 { 内层遍历游戏备战席 }
+		// - 第一个匹配到的则为最高优先级
+		for _, priority := range conf.Entry.AramConfig.SwapPriorityChampIds[:truncation] {
+			for _, bench := range benchChampions {
+				if bench.ChampionId == priority {
+					return bench.ChampionId
+				}
+			}
+		}
+
+	}
+	return -1
+}
 
 func (g *Game) champSelectHandle(data []byte) error {
 	var resp model.EventMessageBlob[model.ChampSelect]
@@ -23,6 +63,20 @@ func (g *Game) champSelectHandle(data []byte) error {
 	}
 
 	champ := resp.Data.MyTeam[resp.Data.LocalPlayerCellId%5]
+
+	// 启用大乱斗自动交换
+	if conf.Entry.AutoSwap &&
+		len(conf.Entry.AramConfig.SwapPriorityChampIds) > 0 &&
+		resp.Data.BenchEnabled &&
+		len(resp.Data.BenchChampions) > 0 {
+		if champId := g.GetSwapChampionId(champ, resp.Data.BenchChampions); champId > 0 {
+			// 这里可以直接结束函数, 切换后会触发下一个事件
+			if c, ok := model.ChampMap[champId]; ok {
+				types.NewNotice(g.ctx, "success", fmt.Sprintf("自动切换: [%s - %s]", c.Title, c.Name))
+			}
+			return g.SwapChampion(champId)
+		}
+	}
 
 	if g.champ != champ.ChampionId {
 		// 如果英雄发生变化发送事件到前端

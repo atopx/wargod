@@ -9,6 +9,13 @@
               @update:value="updateConfig('auto_accept', $event)"
           ></n-switch>
         </n-form-item>
+        <n-form-item label="自动换备战席英雄(大乱斗)">
+          <n-switch
+              size="large"
+              v-model:value="formRef.auto_swap"
+              @update:value="updateConfig('auto_swap', $event)"
+          ></n-switch>
+        </n-form-item>
         <n-form-item label="段位状态">
           <n-switch
               size="large"

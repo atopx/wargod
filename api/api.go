@@ -49,7 +49,9 @@ func (a *Api) SetConfig(entry *conf.Config) error {
 	fmt.Println(conf.Entry, entry)
 	conf.Entry.AutoAccept = entry.AutoAccept
 	conf.Entry.AutoStatus = entry.AutoStatus
+	conf.Entry.AutoSwap = entry.AutoSwap
 	conf.Entry.StatusContent = entry.StatusContent
+	conf.Entry.AramConfig = entry.AramConfig
 	if conf.Entry.StatusContent.RankedLeagueTier == types.TierNone ||
 		conf.Entry.StatusContent.RankedLeagueTier == types.TierMaster ||
 		conf.Entry.StatusContent.RankedLeagueTier == types.TierGrandmaster ||
@@ -140,14 +142,14 @@ func (a *Api) GetSummoner(puuid string) (*model.Summoner, error) {
 }
 
 // ListGameSummary 游戏战绩列表
-func (a *Api) ListGameSummary(puuid string, start, end int) ([]*model.GameSummary, error) {
+func (a *Api) ListGameSummary(puuid string, start, end int) (*model.GameSummary, error) {
 	data, _, err := a.Game.Client.Get(fmt.Sprintf("/lol-match-history/v1/products/lol/%s/matches?begIndex=%d&endIndex=%d", puuid, start, end))
 	if err != nil {
 		return nil, fmt.Errorf("get summoner game list failed: %w", err)
 	}
-	records := make([]*model.GameSummary, 0)
-	_ = json.Unmarshal(data, &records)
-	return records, nil
+	record := new(model.GameSummary)
+	_ = json.Unmarshal(data, &record)
+	return record, nil
 }
 
 // GetGameInfo 对局详情

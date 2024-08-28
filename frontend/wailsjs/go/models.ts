@@ -1,5 +1,17 @@
 export namespace conf {
 	
+	export class AramConfig {
+	    priority_champ_ids: number[];
+	
+	    static createFrom(source: any = {}) {
+	        return new AramConfig(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.priority_champ_ids = source["priority_champ_ids"];
+	    }
+	}
 	export class StatusContent {
 	    status_message: string;
 	    ranked_league_queue: string;
@@ -21,7 +33,9 @@ export namespace conf {
 	export class Config {
 	    auto_accept: boolean;
 	    auto_status: boolean;
+	    auto_swap: boolean;
 	    status_content: StatusContent;
+	    aram_config: AramConfig;
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -31,7 +45,9 @@ export namespace conf {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.auto_accept = source["auto_accept"];
 	        this.auto_status = source["auto_status"];
+	        this.auto_swap = source["auto_swap"];
 	        this.status_content = this.convertValues(source["status_content"], StatusContent);
+	        this.aram_config = this.convertValues(source["aram_config"], AramConfig);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

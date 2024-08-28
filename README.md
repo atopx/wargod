@@ -11,7 +11,8 @@ The God of War in ***League of Legends*** games, It's legitimate game assistant.
 - [ ] 战绩查询 / 分析
 - [x] 自动接受对局
 - [x] 选择英雄事件 -> opgg -> 符文导入 -> 出装、技能
-- [ ] 大乱斗自定义英雄优先级(通过摇骰子/备战席，自动选择英雄)
+- [x] 大乱斗自定义英雄优先级(通过摇骰子/备战席，自动选择英雄)
+- [ ] 排位根据位置自动BAN英雄、选英雄
 
 ### 技术开发项
 

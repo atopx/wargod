@@ -13,7 +13,15 @@ import (
 type Config struct {
 	AutoAccept    bool          `json:"auto_accept"`    // 自动应答
 	AutoStatus    bool          `json:"auto_status"`    // 自动设置段位状态
+	AutoSwap      bool          `json:"auto_swap"`      // 启用自动按优先级替换英雄
 	StatusContent StatusContent `json:"status_content"` // 自动设置段位内容
+	AramConfig    AramConfig    `json:"aram_config"`    // 大乱斗设置
+
+}
+
+// AramConfig 大乱斗模式配置
+type AramConfig struct {
+	SwapPriorityChampIds []int `json:"priority_champ_ids"` // 备战席位优先级设置
 }
 
 type StatusContent struct {
