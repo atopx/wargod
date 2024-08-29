@@ -23,7 +23,11 @@ func (g *Game) gameFlowHandle(data []byte) error {
 		slog.Info("大厅无状态")
 	case FlowLobby:
 		// 获取游戏模式
-		//g.GetGameMode()
+		if conf.Entry.AutoNext {
+			if _, _, err := g.Client.Get("/lol-lobby/v2/lobby/matchmaking/search"); err != nil {
+				slog.Error("自动续盘失败", slog.String("err", err.Error()))
+			}
+		}
 		slog.Info("进入房间")
 	case FlowMatchmaking:
 		slog.Info("开始匹配")

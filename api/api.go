@@ -46,7 +46,7 @@ func (a *Api) GetConfig() *conf.Config {
 }
 
 func (a *Api) SetConfig(entry *conf.Config) error {
-	fmt.Println(conf.Entry, entry)
+	conf.Entry.AutoNext = entry.AutoNext
 	conf.Entry.AutoAccept = entry.AutoAccept
 	conf.Entry.AutoStatus = entry.AutoStatus
 	conf.Entry.AutoSwap = entry.AutoSwap

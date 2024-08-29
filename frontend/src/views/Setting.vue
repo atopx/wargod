@@ -2,6 +2,15 @@
   <n-card title="默认设置">
     <n-form>
       <n-space vertical size="large">
+
+        <n-form-item label="自动续盘">
+          <n-switch
+              size="large"
+              v-model:value="formRef.auto_next"
+              @update:value="updateConfig('auto_next', $event)"
+          ></n-switch>
+        </n-form-item>
+
         <n-form-item label="自动应战">
           <n-switch
               size="large"
@@ -9,6 +18,7 @@
               @update:value="updateConfig('auto_accept', $event)"
           ></n-switch>
         </n-form-item>
+
         <n-form-item label="自动换备战席英雄(大乱斗)">
           <n-switch
               size="large"
@@ -16,12 +26,14 @@
               @update:value="updateConfig('auto_swap', $event)"
           ></n-switch>
         </n-form-item>
+
         <n-form-item label="段位状态">
           <n-switch
               size="large"
               v-model:value="formRef.auto_status"
               @update:value="updateConfig('auto_status', $event)"
           ></n-switch>
+
         </n-form-item>
         <template v-if="formRef.auto_status">
           <n-form-item label="状态消息">
@@ -29,18 +41,21 @@
                 v-model:value="formRef.status_content.status_message"
             ></n-input>
           </n-form-item>
+
           <n-form-item label="队列">
             <n-select
                 v-model:value="formRef.status_content.ranked_league_queue"
                 :options="queueOpts"
             ></n-select>
           </n-form-item>
+
           <n-form-item label="段位">
             <n-select
                 v-model:value="formRef.status_content.ranked_league_tier"
                 :options="tierOpts"
             ></n-select>
           </n-form-item>
+
           <n-form-item label="段位级别">
             <n-select
                 v-model:value="formRef.status_content.ranked_league_division"
@@ -48,11 +63,14 @@
                 :disabled="isDivisionDisabled"
             ></n-select>
           </n-form-item>
+
         </template>
         <!-- 手动保存按钮 -->
+
         <n-form-item>
           <n-button type="primary" @click="saveConfig">手动保存</n-button>
         </n-form-item>
+
       </n-space>
     </n-form>
   </n-card>

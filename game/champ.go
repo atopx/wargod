@@ -24,6 +24,17 @@ func (g *Game) SwapChampion(champId int) error {
 	return nil
 }
 
+// UseDices 摇骰子, num为0时使用所有骰子
+func (g *Game) UseDices(num int) error {
+	for i := 0; i < num; i++ {
+		_, _, err := g.Client.Post("/lol-champ-select/v1/session/my-selection/reroll", EmptyJsonBody)
+		if err != nil {
+			return fmt.Errorf("使用骰子失败: %w", err)
+		}
+	}
+	return nil
+}
+
 // GetSwapChampionId 匹配备战席中最高优先级的英雄
 func (g *Game) GetSwapChampionId(champ model.Team, benchChampions []model.BenchChampion) int {
 	truncation := len(conf.Entry.AramConfig.SwapPriorityChampIds)
@@ -69,6 +80,13 @@ func (g *Game) champSelectHandle(data []byte) error {
 		len(conf.Entry.AramConfig.SwapPriorityChampIds) > 0 &&
 		resp.Data.BenchEnabled &&
 		len(resp.Data.BenchChampions) > 0 {
+
+		// 先使用所有骰子
+		if err := g.UseDices(1); err != nil {
+			slog.Error(err.Error())
+		}
+
+		// 寻找高优先级英雄
 		if champId := g.GetSwapChampionId(champ, resp.Data.BenchChampions); champId > 0 {
 			// 这里可以直接结束函数, 切换后会触发下一个事件
 			if c, ok := model.ChampMap[champId]; ok {
