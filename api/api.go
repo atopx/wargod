@@ -41,7 +41,6 @@ func (a *Api) GameLauncher() error {
 }
 
 func (a *Api) GetConfig() *conf.Config {
-	fmt.Printf("%+v\n", conf.Entry)
 	return conf.Entry
 }
 
@@ -62,6 +61,13 @@ func (a *Api) SetConfig(entry *conf.Config) error {
 		_, _, err := a.Game.Client.Put(game.EndpointChatMe, conf.Entry.StatusContent.Data())
 		if err != nil {
 			slog.Error("set chat-me status failed", slog.String("err", err.Error()))
+		}
+	}
+
+	if conf.Entry.AutoNext && a.Game.Flow == game.FlowLobby {
+		// 开启自动续盘且在房间状态中, 自动开始
+		if err := a.Game.StartLobbyMatchmaking(); err != nil {
+			slog.Error("start lobby matchmaking failed", slog.String("err", err.Error()))
 		}
 	}
 	return conf.SaveConfig()

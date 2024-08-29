@@ -31,6 +31,7 @@ export namespace conf {
 	    }
 	}
 	export class Config {
+	    auto_next: boolean;
 	    auto_accept: boolean;
 	    auto_status: boolean;
 	    auto_swap: boolean;
@@ -43,6 +44,7 @@ export namespace conf {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.auto_next = source["auto_next"];
 	        this.auto_accept = source["auto_accept"];
 	        this.auto_status = source["auto_status"];
 	        this.auto_swap = source["auto_swap"];

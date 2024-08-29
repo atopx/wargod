@@ -8,6 +8,7 @@ The God of War in ***League of Legends*** games, It's legitimate game assistant.
 
 > 启动切换备战席英雄过于逆天(秒切换, 无保护CD), 可能影响队友关系，目前禁用掉
 
+- [ ] 自动游戏登录
 - [ ] 修改生涯背景
 - [x] 修改段位和状态[仅聊天栏好友可见]
 - [ ] 战绩查询 / 分析

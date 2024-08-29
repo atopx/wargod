@@ -9,6 +9,13 @@ import (
 	"wargod/model"
 )
 
+func (g *Game) StartLobbyMatchmaking() error {
+	if _, _, err := g.Client.Post("/lol-lobby/v2/lobby/matchmaking/search", EmptyJsonBody); err != nil {
+		return fmt.Errorf("自动续盘失败: %w", err)
+	}
+	return nil
+}
+
 func (g *Game) gameFlowHandle(data []byte) error {
 	var resp model.EventMessageBlob[string]
 	if err := json.Unmarshal(data, &resp); err != nil {
@@ -23,12 +30,12 @@ func (g *Game) gameFlowHandle(data []byte) error {
 		slog.Info("大厅无状态")
 	case FlowLobby:
 		// 获取游戏模式
+		slog.Info("进入房间", slog.Bool("AutoNext", conf.Entry.AutoNext))
 		if conf.Entry.AutoNext {
-			if _, _, err := g.Client.Get("/lol-lobby/v2/lobby/matchmaking/search"); err != nil {
-				slog.Error("自动续盘失败", slog.String("err", err.Error()))
+			if err := g.StartLobbyMatchmaking(); err != nil {
+				slog.Error(err.Error())
 			}
 		}
-		slog.Info("进入房间")
 	case FlowMatchmaking:
 		slog.Info("开始匹配")
 	case FlowChampSelect:

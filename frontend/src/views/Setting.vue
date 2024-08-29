@@ -130,8 +130,13 @@ const getConfig = async () => {
   }
 };
 
+const autoSaveKeys = ["auto_next", "auto_accept", "auto_swap"]
+
 const updateConfig = (key: keyof conf.Config, value: any) => {
   formRef.value[key] = value;
+  if (autoSaveKeys.includes(key)) {
+    saveConfig()
+  }
 };
 
 const saveConfig = async () => {
